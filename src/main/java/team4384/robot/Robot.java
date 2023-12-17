@@ -4,12 +4,20 @@
 
 package team4384.robot;
 
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import team4384.robot.constants.CTREConfigs;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -26,6 +34,8 @@ public class Robot extends TimedRobot {
 
   SendableChooser<Integer> pathChosen;
   private RobotContainer m_robotContainer;
+  private String TrajectoryJSON = "../output/Testing.wpilib.json";
+  Trajectory trajectory = new Trajectory();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -36,7 +46,13 @@ public class Robot extends TimedRobot {
     ctreConfigs = new CTREConfigs();
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
+    try {
+      Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(TrajectoryJSON);
+      trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+    } catch (IOException ex) {
+      DriverStation.reportError("Unable", ex.getStackTrace());
+    }
+    m_robotContainer = new RobotContainer(trajectory);
   }
 
   /**

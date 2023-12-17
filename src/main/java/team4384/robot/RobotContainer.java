@@ -2,6 +2,7 @@ package team4384.robot;
 
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -36,11 +37,11 @@ public class RobotContainer {
     /* Subsystems */
     public final Swerve s_Swerve = new Swerve();
 
-    public Autonomous autonomous = new Autonomous(s_Swerve, s_Swerve.gyro);
 
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
-    public RobotContainer() {
+    public RobotContainer(Trajectory t) {
+        Autonomous autonomous = new Autonomous(s_Swerve, s_Swerve.gyro, t);
         /* Driver Buttons */
         JoystickButton rotate = new JoystickButton(driver, Joystick.ButtonType.kTrigger.value);
         s_Swerve.setDefaultCommand(
