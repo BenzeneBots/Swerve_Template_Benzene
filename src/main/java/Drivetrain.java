@@ -1,5 +1,6 @@
 import Constants.SwerveConstants;
 import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.*;
@@ -18,8 +19,12 @@ public class Drivetrain extends SubsystemBase {
     private GenericEntry[] CanCoder = {};
     private GenericEntry[] Velocity;
     private GenericEntry[] Angle;
+    private SwerveModuleState[] desiredStates;
+    private boolean isOpenLoop;
 
-    public Drivetrain() {
+    public Drivetrain(boolean isOpenLoop) {
+        this.isOpenLoop = isOpenLoop;
+
         gyro = new AHRS(SerialPort.Port.kUSB);
         zeroGyro();
 
@@ -81,10 +86,20 @@ public class Drivetrain extends SubsystemBase {
         }
     }
 
+    public Pose2d getPose() {
+        return swerveOdometry.getPoseMeters();
+    }
+
+    public void updateStates(SwerveModuleState[] states) {
+        this.desiredStates = states;
+    }
+
+    public void updateOdometery() {
+        swerveOdometry.update(Rotation2d.fromDegrees(gyro.getYaw()), getModulePosition());
+    }
+
     @Override
     public void periodic() {
-        swerveOdometry.update(getYaw(), getModulePosition());
-
         for(int i = 0; i < swerveModules.length; i++) {
             SwerveModule mod = swerveModules[i];
 
@@ -92,6 +107,12 @@ public class Drivetrain extends SubsystemBase {
             Angle[i].setDouble(mod.getPosition().angle.getDegrees());
             Velocity[i].setDouble(mod.getSpeed());
         }
+
+        for(SwerveModule mod : swerveModules) {
+            mod.setDesiredState(desiredStates[mod.moduleNumber], isOpenLoop);
+        }
+
+        updateOdometery();
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -111,8 +132,6 @@ public class Drivetrain extends SubsystemBase {
                 );
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, SwerveConstants.maxSpeedMPS);
 
-        for(SwerveModule mod : swerveModules) {
-            mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
-        }
+        this.desiredStates = swerveModuleStates;
     }
 }

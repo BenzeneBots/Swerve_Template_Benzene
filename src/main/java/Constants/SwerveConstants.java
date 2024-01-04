@@ -1,9 +1,12 @@
 package Constants;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
 public class SwerveConstants {
@@ -26,6 +29,7 @@ public class SwerveConstants {
     public static final double maxRotSpeed = .3;
 
     public static double maxSpeedMPS = 0.2;
+    public static double maxAcceleration = 0.9;
 
     public static final FalconSwerveConstants chosenModule = FalconSwerveConstants.SDSMK4i(FalconSwerveConstants.driveGearRatios.SDSMK4i_L2);
     public static double gearRatio = FalconSwerveConstants.driveGearRatios.SDSMK4i_L2;
@@ -91,4 +95,10 @@ public class SwerveConstants {
     public static int BR3encoder = 2;
     public static Rotation2d BR3offset = new Rotation2d(0.0);
 
+    public static final class follower {
+        public static final TrapezoidProfile.Constraints ROT_PROFILE = new TrapezoidProfile.Constraints(6380.0/60, 10*Math.PI);
+        public static final PIDController X_PID_CONTROLLER = new PIDController(0.23, 0, 0);
+        public static final PIDController Y_PID_CONTROLLER = new PIDController(0.6, 0, 0);
+        public static final ProfiledPIDController ROT_PID_CONTROLLER = new ProfiledPIDController(0.415, 0, 0, ROT_PROFILE);
+    }
 }
